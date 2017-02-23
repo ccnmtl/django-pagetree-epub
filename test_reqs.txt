@@ -1,0 +1,8 @@
+django-treebeard
+django-pagetree
+coverage
+flake8
+django-jenkins
+pep8
+pyflakes
+factory_boy
