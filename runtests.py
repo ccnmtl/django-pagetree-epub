@@ -35,6 +35,7 @@ def main():
         COVERAGE_EXCLUDES_FOLDERS=['migrations'],
         ROOT_URLCONF=[],
         PAGEBLOCKS=['pagetree.TestBlock', ],
+        EPUB_ALLOWED_BLOCKS=['DummyBlock'],
 
         # Django replaces this, but it still wants it. *shrugs*
         DATABASES={

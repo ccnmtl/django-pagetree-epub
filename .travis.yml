@@ -10,7 +10,7 @@ env:
 # command to install dependencies
 install:
   - pip install -q $DJANGO
-  - pip install -q -r test_reqs.txt
+  - pip install -q -r test_reqs.txt --index-url=https://pypi.ccnmtl.columbia.edu/
 
 # command to run tests
 script:
