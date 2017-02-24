@@ -52,6 +52,18 @@ class PageTreeRootFinder(object):
         return get_section_from_path('/')
 
 
+def add_static_files_to_book(hierarchy, im_book):
+    for pb in PageBlock.objects.filter(
+            section__hierarchy=hierarchy):
+
+        # so far, just implemented for images
+        if is_image_block(pb):
+            fullpath = os.path.join(settings.MEDIA_ROOT,
+                                    pb.block().image.name)
+            im_book.addImage(fullpath, image_epub_filename(pb))
+    return im_book
+
+
 class EpubExporterView(View):
     root_finder = PageTreeRootFinder
     template_name = "epub/form.html"
@@ -79,13 +91,7 @@ class EpubExporterView(View):
         im_book.addTitlePage()
         im_book.addTocPage()
 
-        # gather images from all the blocks in the site
-        for pb in PageBlock.objects.filter(
-                section__hierarchy=root_section.hierarchy):
-            if is_image_block(pb):
-                fullpath = os.path.join(settings.MEDIA_ROOT,
-                                        pb.block().image.name)
-                im_book.addImage(fullpath, image_epub_filename(pb))
+        im_book = add_static_files_to_book(root_section.hierarchy, im_book)
 
         depth_first_traversal = root_section.get_annotated_list()
         for (i, (s, ai)) in enumerate(depth_first_traversal):
