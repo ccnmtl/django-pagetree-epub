@@ -49,14 +49,7 @@ class EpubExporterView(View):
 
         im_book = epub.EpubBook(template_dir=settings.EPUB_TEMPLATE_DIR)
 
-        im_book.setTitle(self.get_title())
-        im_book.addCreator(self.get_creator())
-        im_book.addMeta('date', self.get_publication(),
-                        event='publication')
-
-        im_book.addTitlePage()
-        im_book.addTocPage()
-
+        im_book = self.set_epub_metadata(im_book)
         im_book = self.add_static_files_to_book(root_section.hierarchy,
                                                 im_book)
         im_book = self.add_chapters(root_section, im_book)
@@ -67,6 +60,16 @@ class EpubExporterView(View):
         resp['Content-Disposition'] = ("attachment; filename=%s" %
                                        self.get_epub_filename(root_section))
         return resp
+
+    def set_epub_metadata(self, im_book):
+        im_book.setTitle(self.get_title())
+        im_book.addCreator(self.get_creator())
+        im_book.addMeta('date', self.get_publication(),
+                        event='publication')
+
+        im_book.addTitlePage()
+        im_book.addTocPage()
+        return im_book
 
     def add_static_files_to_book(self, hierarchy, im_book):
         for pb in PageBlock.objects.filter(
@@ -87,9 +90,7 @@ class EpubExporterView(View):
                 continue
             if s.hierarchy != root_section.hierarchy:
                 continue
-            title = s.label
-            if s.label == '':
-                title = "chapter %d" % i
+            title = self.title_from_section(s, i)
             n = im_book.addHtml('', '%d.html' % i, self.section_html(s))
             im_book.addSpineItem(n)
             depth = depth_from_ai(ai)
@@ -125,6 +126,12 @@ class EpubExporterView(View):
 
     def get_epub_filename(self, root_section):
         return "%s.epub" % root_section.hierarchy.name
+
+    def title_from_section(self, s, i):
+        title = s.label
+        if s.label == '':
+            title = "chapter %d" % i
+        return title
 
 
 def depth_from_ai(ai):
