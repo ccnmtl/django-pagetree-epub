@@ -10,11 +10,15 @@ env:
 # command to install dependencies
 install:
   - pip install -q $DJANGO
-  - pip install -q -r test_reqs.txt --index-url=https://pypi.ccnmtl.columbia.edu/
+  - pip install -q -r test_reqs.txt   --index-url=https://pypi.ccnmtl.columbia.edu/
+  - pip install coveralls
 
 # command to run tests
 script:
   - flake8 runtests.py pagetreeepub
   - python runtests.py
+  - coverage run --source=pagetreeepub runtests.py
 notifications:
   slack: ccnmtl:GizSNscLWJLldjQrffB8mwgm
+after_success:
+  - coveralls
