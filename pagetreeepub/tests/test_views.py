@@ -1,7 +1,8 @@
 from django.test import RequestFactory
 from unittest import TestCase
 
-from ..views import is_block_allowed, is_image_block, EpubExporterView
+from ..views import (
+    is_block_allowed, is_image_block, EpubExporterView, depth_from_ai)
 
 
 class DummyBlock(object):
@@ -43,3 +44,9 @@ class TestView(TestCase):
         request = f.post("/fake-path")
         response = v(request)
         self.assertEqual(response.status_code, 200)
+
+
+class TestDepthFromAI(TestCase):
+    def test_depth(self):
+        self.assertIsNone(depth_from_ai(dict(level=1)))
+        self.assertEqual(depth_from_ai(dict(level=2)), 2)
