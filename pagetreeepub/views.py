@@ -80,7 +80,7 @@ class EpubExporterView(View):
 
         im_book = epub.EpubBook(template_dir=settings.EPUB_TEMPLATE_DIR)
 
-        publication = settings.EPUB_PUBLICATION
+        publication = self.get_publication()
         im_book.setTitle(self.get_title())
         im_book.addCreator(self.get_creator())
         im_book.addMeta('date', publication,
@@ -122,6 +122,9 @@ class EpubExporterView(View):
 
     def get_creator(self):
         return settings.EPUB_CREATOR
+
+    def get_publication(self):
+        return settings.EPUB_PUBLICATION
 
 
 def depth_from_ai(ai):
