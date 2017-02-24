@@ -1,6 +1,7 @@
+from django.test import RequestFactory
 from unittest import TestCase
 
-from ..views import is_block_allowed, is_image_block
+from ..views import is_block_allowed, is_image_block, EpubExporterView
 
 
 class DummyBlock(object):
@@ -26,3 +27,19 @@ class TestHelpers(TestCase):
         self.assertFalse(is_image_block(d))
         d = DummyBlock("Image Block")
         self.assertTrue(is_image_block(d))
+
+
+class TestView(TestCase):
+    def test_get(self):
+        v = EpubExporterView.as_view()
+        f = RequestFactory()
+        request = f.get("/fake-path")
+        response = v(request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_post(self):
+        v = EpubExporterView.as_view()
+        f = RequestFactory()
+        request = f.post("/fake-path")
+        response = v(request)
+        self.assertEqual(response.status_code, 200)
