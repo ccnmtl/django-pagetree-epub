@@ -75,30 +75,12 @@ class EpubExporterView(View):
     def get(self, request):
         return render(request, self.template_name, dict())
 
-    def add_chapters(self, root_section, im_book):
-        depth_first_traversal = root_section.get_annotated_list()
-        for (i, (s, ai)) in enumerate(depth_first_traversal):
-            # skip the root
-            if s.is_root():
-                continue
-            if s.hierarchy != root_section.hierarchy:
-                continue
-            title = s.label
-            if s.label == '':
-                title = "chapter %d" % i
-            n = im_book.addHtml('', '%d.html' % i,
-                                section_html(s))
-            im_book.addSpineItem(n)
-            depth = depth_from_ai(ai)
-            im_book.addTocMapNode(n.destPath, title, depth=depth)
-        return im_book
-
     def post(self, request):
         root_section = self.get_root_section()
 
         im_book = epub.EpubBook(template_dir=settings.EPUB_TEMPLATE_DIR)
 
-        title = settings.EPUB_TITLE
+        title = self.get_title()
         creator = settings.EPUB_CREATOR
         publication = settings.EPUB_PUBLICATION
         im_book.setTitle(title)
@@ -118,6 +100,27 @@ class EpubExporterView(View):
         resp['Content-Disposition'] = ("attachment; filename=%s.epub" %
                                        root_section.hierarchy.name)
         return resp
+
+    def add_chapters(self, root_section, im_book):
+        depth_first_traversal = root_section.get_annotated_list()
+        for (i, (s, ai)) in enumerate(depth_first_traversal):
+            # skip the root
+            if s.is_root():
+                continue
+            if s.hierarchy != root_section.hierarchy:
+                continue
+            title = s.label
+            if s.label == '':
+                title = "chapter %d" % i
+            n = im_book.addHtml('', '%d.html' % i,
+                                section_html(s))
+            im_book.addSpineItem(n)
+            depth = depth_from_ai(ai)
+            im_book.addTocMapNode(n.destPath, title, depth=depth)
+        return im_book
+
+    def get_title(self):
+        return settings.EPUB_TITLE
 
 
 def depth_from_ai(ai):
