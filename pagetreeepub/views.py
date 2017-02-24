@@ -2,6 +2,7 @@ import os
 
 from django.conf import settings
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views.generic.base import View
 
@@ -53,10 +54,14 @@ class PageTreeRootFinder(object):
 
 class EpubExporterView(View):
     root_finder = PageTreeRootFinder
+    template_name = "epub/form.html"
 
     def get_root_section(self):
         rf = self.root_finder()
-        return rf.get()
+        return rf.get_root()
+
+    def get(self, request):
+        return render(request, self.template_name, dict())
 
     def post(self, request):
         root_section = self.get_root_section()
@@ -92,11 +97,11 @@ class EpubExporterView(View):
             title = s.label
             if s.label == '':
                 title = "chapter %d" % i
-                n = im_book.addHtml('', '%d.html' % i,
-                                    section_html(s))
-                im_book.addSpineItem(n)
-                depth = depth_from_ai(ai)
-                im_book.addTocMapNode(n.destPath, title, depth=depth)
+            n = im_book.addHtml('', '%d.html' % i,
+                                section_html(s))
+            im_book.addSpineItem(n)
+            depth = depth_from_ai(ai)
+            im_book.addTocMapNode(n.destPath, title, depth=depth)
 
         out = im_book.make_epub()
         resp = HttpResponse(out.getvalue(),
