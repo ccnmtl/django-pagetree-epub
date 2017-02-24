@@ -75,6 +75,24 @@ class EpubExporterView(View):
     def get(self, request):
         return render(request, self.template_name, dict())
 
+    def add_chapters(self, root_section, im_book):
+        depth_first_traversal = root_section.get_annotated_list()
+        for (i, (s, ai)) in enumerate(depth_first_traversal):
+            # skip the root
+            if s.is_root():
+                continue
+            if s.hierarchy != root_section.hierarchy:
+                continue
+            title = s.label
+            if s.label == '':
+                title = "chapter %d" % i
+            n = im_book.addHtml('', '%d.html' % i,
+                                section_html(s))
+            im_book.addSpineItem(n)
+            depth = depth_from_ai(ai)
+            im_book.addTocMapNode(n.destPath, title, depth=depth)
+        return im_book
+
     def post(self, request):
         root_section = self.get_root_section()
 
@@ -92,22 +110,7 @@ class EpubExporterView(View):
         im_book.addTocPage()
 
         im_book = add_static_files_to_book(root_section.hierarchy, im_book)
-
-        depth_first_traversal = root_section.get_annotated_list()
-        for (i, (s, ai)) in enumerate(depth_first_traversal):
-            # skip the root
-            if s.is_root():
-                continue
-            if s.hierarchy != root_section.hierarchy:
-                continue
-            title = s.label
-            if s.label == '':
-                title = "chapter %d" % i
-            n = im_book.addHtml('', '%d.html' % i,
-                                section_html(s))
-            im_book.addSpineItem(n)
-            depth = depth_from_ai(ai)
-            im_book.addTocMapNode(n.destPath, title, depth=depth)
+        im_book = self.add_chapters(root_section, im_book)
 
         out = im_book.make_epub()
         resp = HttpResponse(out.getvalue(),
