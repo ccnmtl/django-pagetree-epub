@@ -105,7 +105,7 @@ class EpubExporterView(View):
     def get_publication(self):
         return settings.EPUB_PUBLICATION
 
-    def section_html(section):
+    def section_html(self, section):
         """ return a quick and dirty HTML version of the
         section suitable for epub """
         blocks = []
