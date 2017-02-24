@@ -64,8 +64,8 @@ class EpubExporterView(View):
         out = im_book.make_epub()
         resp = HttpResponse(out.getvalue(),
                             content_type="application/x-zip-compressed")
-        resp['Content-Disposition'] = ("attachment; filename=%s.epub" %
-                                       root_section.hierarchy.name)
+        resp['Content-Disposition'] = ("attachment; filename=%s" %
+                                       self.get_epub_filename(root_section))
         return resp
 
     def add_static_files_to_book(self, hierarchy, im_book):
@@ -122,6 +122,9 @@ class EpubExporterView(View):
 
         return render_to_string('epub/section.html',
                                 dict(section=section, blocks=blocks))
+
+    def get_epub_filename(self, root_section):
+        return "%s.epub" % root_section.hierarchy.name
 
 
 def depth_from_ai(ai):
