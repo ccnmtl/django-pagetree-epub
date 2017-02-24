@@ -36,6 +36,7 @@ class PageTreeRootFinder(object):
 class EpubExporterView(View):
     root_finder = PageTreeRootFinder
     template_name = "epub/form.html"
+    section_template = 'epub/section.html'
 
     def get_root_section(self):
         rf = self.root_finder()
@@ -121,7 +122,7 @@ class EpubExporterView(View):
                 block.unrenderable = True
                 blocks.append(block)
 
-        return render_to_string('epub/section.html',
+        return render_to_string(self.section_template,
                                 dict(section=section, blocks=blocks))
 
     def get_epub_filename(self, root_section):
