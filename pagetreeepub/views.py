@@ -80,10 +80,9 @@ class EpubExporterView(View):
 
         im_book = epub.EpubBook(template_dir=settings.EPUB_TEMPLATE_DIR)
 
-        creator = self.get_creator()
         publication = settings.EPUB_PUBLICATION
         im_book.setTitle(self.get_title())
-        im_book.addCreator(creator)
+        im_book.addCreator(self.get_creator())
         im_book.addMeta('date', publication,
                         event='publication')
 
