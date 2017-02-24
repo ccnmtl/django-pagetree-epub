@@ -25,43 +25,12 @@ def image_epub_filename(block):
         block.pk, os.path.basename(block.block().image.name))
 
 
-def section_html(section):
-    """ return a quick and dirty HTML version of the
-    section suitable for epub """
-    blocks = []
-    for block in section.pageblock_set.all():
-        if is_block_allowed(block):
-            blocks.append(block)
-        elif is_image_block(block):
-            block.is_image_block = True
-            block.epub_image_filename = image_epub_filename(block)
-            blocks.append(block)
-        else:
-            block.unrenderable = True
-            blocks.append(block)
-
-    return render_to_string('epub/section.html',
-                            dict(section=section, blocks=blocks))
-
-
 class PageTreeRootFinder(object):
     path = "/"
 
     def get_root(self):
         # rely on all the defaults
         return get_section_from_path('/')
-
-
-def add_static_files_to_book(hierarchy, im_book):
-    for pb in PageBlock.objects.filter(
-            section__hierarchy=hierarchy):
-
-        # so far, just implemented for images
-        if is_image_block(pb):
-            fullpath = os.path.join(settings.MEDIA_ROOT,
-                                    pb.block().image.name)
-            im_book.addImage(fullpath, image_epub_filename(pb))
-    return im_book
 
 
 class EpubExporterView(View):
@@ -88,7 +57,8 @@ class EpubExporterView(View):
         im_book.addTitlePage()
         im_book.addTocPage()
 
-        im_book = add_static_files_to_book(root_section.hierarchy, im_book)
+        im_book = self.add_static_files_to_book(root_section.hierarchy,
+                                                im_book)
         im_book = self.add_chapters(root_section, im_book)
 
         out = im_book.make_epub()
@@ -97,6 +67,17 @@ class EpubExporterView(View):
         resp['Content-Disposition'] = ("attachment; filename=%s.epub" %
                                        root_section.hierarchy.name)
         return resp
+
+    def add_static_files_to_book(self, hierarchy, im_book):
+        for pb in PageBlock.objects.filter(
+                section__hierarchy=hierarchy):
+
+            # so far, just implemented for images
+            if is_image_block(pb):
+                fullpath = os.path.join(settings.MEDIA_ROOT,
+                                        pb.block().image.name)
+                im_book.addImage(fullpath, image_epub_filename(pb))
+        return im_book
 
     def add_chapters(self, root_section, im_book):
         depth_first_traversal = root_section.get_annotated_list()
@@ -109,8 +90,7 @@ class EpubExporterView(View):
             title = s.label
             if s.label == '':
                 title = "chapter %d" % i
-            n = im_book.addHtml('', '%d.html' % i,
-                                section_html(s))
+            n = im_book.addHtml('', '%d.html' % i, self.section_html(s))
             im_book.addSpineItem(n)
             depth = depth_from_ai(ai)
             im_book.addTocMapNode(n.destPath, title, depth=depth)
@@ -124,6 +104,24 @@ class EpubExporterView(View):
 
     def get_publication(self):
         return settings.EPUB_PUBLICATION
+
+    def section_html(section):
+        """ return a quick and dirty HTML version of the
+        section suitable for epub """
+        blocks = []
+        for block in section.pageblock_set.all():
+            if is_block_allowed(block):
+                blocks.append(block)
+            elif is_image_block(block):
+                block.is_image_block = True
+                block.epub_image_filename = image_epub_filename(block)
+                blocks.append(block)
+            else:
+                block.unrenderable = True
+                blocks.append(block)
+
+        return render_to_string('epub/section.html',
+                                dict(section=section, blocks=blocks))
 
 
 def depth_from_ai(ai):
