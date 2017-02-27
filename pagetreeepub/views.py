@@ -10,9 +10,7 @@ from epubbuilder import epub
 from pagetree.helpers import get_section_from_path
 from pagetree.models import PageBlock
 
-
-def is_block_allowed(block):
-    return block.content_object.display_name in settings.EPUB_ALLOWED_BLOCKS
+from .renderers import DefaultRenderer
 
 
 def is_image_block(block):
@@ -46,6 +44,7 @@ class EpubExporterView(View):
         return render(request, self.template_name, dict())
 
     def post(self, request):
+        self.setup_renderers()
         root_section = self.get_root_section()
 
         im_book = epub.EpubBook(template_dir=settings.EPUB_TEMPLATE_DIR)
@@ -61,6 +60,15 @@ class EpubExporterView(View):
         resp['Content-Disposition'] = ("attachment; filename=%s" %
                                        self.get_epub_filename(root_section))
         return resp
+
+    def setup_renderers(self):
+        self.renderers = dict()
+        # these all just get the default renderer
+        for block in settings.EPUB_ALLOWED_BLOCKS:
+            self.renderers[block] = DefaultRenderer
+        # then merge with custom renderers
+        if hasattr(settings, 'EPUB_BLOCK_RENDERERS'):
+            self.renderers.update(settings.EPUB_BLOCK_RENDERERS)
 
     def set_epub_metadata(self, im_book):
         im_book.setTitle(self.get_title())
@@ -107,20 +115,22 @@ class EpubExporterView(View):
     def get_publication(self):
         return settings.EPUB_PUBLICATION
 
+    def is_block_allowed(self, block):
+        return block.content_object.display_name in self.renderers
+
+    def get_renderer(self, block):
+        return self.renderers[block.content_object.display_name](block)
+
     def section_html(self, section):
-        """ return a quick and dirty HTML version of the
-        section suitable for epub """
         blocks = []
         for block in section.pageblock_set.all():
-            if is_block_allowed(block):
-                blocks.append(block)
-            elif is_image_block(block):
-                block.is_image_block = True
-                block.epub_image_filename = image_epub_filename(block)
-                blocks.append(block)
+            if self.is_block_allowed(block):
+                renderer = self.get_renderer(block)
+                block.epub_content = renderer.render()
+                block.unrenderable = False
             else:
                 block.unrenderable = True
-                blocks.append(block)
+            blocks.append(block)
 
         return render_to_string(self.section_template,
                                 dict(section=section, blocks=blocks))

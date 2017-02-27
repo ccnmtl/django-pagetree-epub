@@ -2,7 +2,7 @@ from django.test import RequestFactory
 from unittest import TestCase
 
 from ..views import (
-    is_block_allowed, is_image_block, EpubExporterView, depth_from_ai)
+    is_image_block, EpubExporterView, depth_from_ai)
 
 
 class DummyBlock(object):
@@ -17,12 +17,6 @@ class DummyBlock(object):
 
 
 class TestHelpers(TestCase):
-    def test_is_block_allowed(self):
-        d = DummyBlock("DummyBlock")
-        self.assertTrue(is_block_allowed(d))
-        d = DummyBlock("SomethingElse")
-        self.assertFalse(is_block_allowed(d))
-
     def test_is_image_block(self):
         d = DummyBlock("DummyBlock")
         self.assertFalse(is_image_block(d))
