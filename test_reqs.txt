@@ -6,4 +6,4 @@ django-jenkins
 pep8
 pyflakes
 factory_boy
-epubbuilder==0.1.4
+requirements/epubbuilder-0.2.0-py2.py3-none-any.whl
