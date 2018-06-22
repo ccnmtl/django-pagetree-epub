@@ -7,7 +7,7 @@ setup(
     name="django-pagetree-epub",
     version="0.1.0",
     author="Anders Pearson",
-    author_email="anders@columbia.edu",
+    author_email="ctl-dev@columbia.edu",
     url="https://github.com/ccnmtl/django-pagetree-epub",
     description="make an epub from a pagetree site",
     long_description=open(
