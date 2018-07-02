@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 """ run tests for pagetreeepub
 
 $ virtualenv ve
