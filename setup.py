@@ -7,7 +7,7 @@ ROOT = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name="django-pagetree-epub",
-    version="0.1.0",
+    version="0.3.0",
     author="Anders Pearson",
     author_email="ctl-dev@columbia.edu",
     url="https://github.com/ccnmtl/django-pagetree-epub",
