@@ -86,6 +86,7 @@ def main():
         pass
 
     # Fire off the tests
+    call_command('migrate')
     call_command('test')
 
 
