@@ -2,3 +2,5 @@
 dist
 build
 ve
+__pycache__
+.coverage

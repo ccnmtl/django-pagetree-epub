@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ccnmtl/django-pagetree-epub.png?branch=master)](https://travis-ci.org/ccnmtl/django-pagetree-epub)
+[![Actions Status](https://github.com/ccnmtl/django-pagetree-epub/workflows/build-and-test/badge.svg)](https://github.com/ccnmtl/django-pagetree-epub/actions)
 [![Coverage Status](https://coveralls.io/repos/github/ccnmtl/django-pagetree-epub/badge.svg?branch=master)](https://coveralls.io/github/ccnmtl/django-pagetree-epub?branch=master)
 
 epub export library for django-pagetree
